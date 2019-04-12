@@ -1,0 +1,11 @@
+GatewayServer
+HTTPAServer
+LoginServer
+MissionServer
+TicketServer
+WorldServer
+WorldServer101
+WorldServer102
+ZoneServer
+ZoneServer101
+ZoneServer102
