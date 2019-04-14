@@ -4,7 +4,26 @@ int convert(FILE* fp_in, FILE* fp_out, int search[], int size, int replace[]);
 
 int main(int argc, char* argv[]) {
 	int pattern[] = {0x3D, 0x0A, 0x0A, 0x0A, 0x00, 0x0F, 0x84, 0xEB, 0xFE, 0xFF, 0xFF, 0x3D};
+	int crus_pattern_w1[] = {0x28, 0x21, 0xE8, 0x81, 0xFD};
+	int crus_pattern_w2[] = {0xFF, 0xFF, 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3D};
+	int crus_pattern_w3[] = {0x00, 0x0F, 0x94, 0xC2, 0x81, 0xFD};
+	int crus_pattern_z[] = {0xC7, 0x44, 0x89, 0xF0, 0x25, 0xFF, 0xFF, 0xFF, 0x00, 0x3D};
 	int replace_ip[4];
+	int counter = 0;
+	//remove old files
+	remove("output/GatewayServer");
+	remove("output/HTTPAServer");
+	remove("output/LoginServer");
+	remove("output/MissionServer");
+	remove("output/TicketServer");
+	remove("output/WorldServer");
+	remove("output/WorldServer_1");
+	remove("output/WorldServer_2");
+	remove("output/WorldServer101");
+	remove("output/WorldServer102");
+	remove("output/ZoneServer");
+	remove("output/ZoneServer101");
+	remove("output/ZoneServer102");
 	//interface
 	printf("Enter new ip:\n");
 	scanf("%d.%d.%d.%d", &replace_ip[0], &replace_ip[1], &replace_ip[2], &replace_ip[3]);
@@ -53,8 +72,30 @@ int main(int argc, char* argv[]) {
 	FILE* fp_ws_in = fopen("input/WorldServer", "rb");
 	if(fp_ws_in != NULL) {
 		FILE* fp_ws_out = fopen("output/WorldServer", "ab");
-		printf("Found %d occurrences in WorldServer.\n", convert(fp_ws_in, fp_ws_out, pattern, sizeof(pattern) / sizeof(int), replace_ip));
+		counter = convert(fp_ws_in, fp_ws_out, pattern, sizeof(pattern) / sizeof(int), replace_ip);
+		if(counter != 0) {
+			printf("Found %d occurrences in WorldServer.\n", counter);
+		}
 		fclose(fp_ws_out);
+		if(counter == 0) {
+			remove("output/WorldServer");
+			fclose(fp_ws_in);
+			fp_ws_in = fopen("input/WorldServer", "rb");
+			fp_ws_out = fopen("output/WorldServer_1", "ab");
+			counter = convert(fp_ws_in, fp_ws_out, crus_pattern_w1, sizeof(crus_pattern_w1) / sizeof(int), replace_ip);
+			fclose(fp_ws_in);
+			fclose(fp_ws_out);
+			fp_ws_in = fopen("output/WorldServer_1", "rb");
+			fp_ws_out = fopen("output/WorldServer_2", "ab");
+			counter += convert(fp_ws_in, fp_ws_out, crus_pattern_w2, sizeof(crus_pattern_w2) / sizeof(int), replace_ip);
+			fclose(fp_ws_in);
+			fclose(fp_ws_out);
+			fp_ws_in = fopen("output/WorldServer_2", "rb");
+			fp_ws_out = fopen("output/WorldServer", "ab");
+			counter += convert(fp_ws_in, fp_ws_out, crus_pattern_w3, sizeof(crus_pattern_w3) / sizeof(int), replace_ip);
+			printf("Found %d occurrences in WorldServer.\n", counter);
+			fclose(fp_ws_out);
+		}
 	}
 	fclose(fp_ws_in);
 	//WorldServer101
@@ -77,8 +118,20 @@ int main(int argc, char* argv[]) {
 	FILE* fp_zs_in = fopen("input/ZoneServer", "rb");
 	if(fp_zs_in != NULL) {
 		FILE* fp_zs_out = fopen("output/ZoneServer", "ab");
-		printf("Found %d occurrences in ZoneServer.\n", convert(fp_zs_in, fp_zs_out, pattern, sizeof(pattern) / sizeof(int), replace_ip));
+		counter = convert(fp_zs_in, fp_zs_out, pattern, sizeof(pattern) / sizeof(int), replace_ip);
+		if(counter != 0) {
+			printf("Found %d occurrences in ZoneServer.\n", counter);
+		}
 		fclose(fp_zs_out);
+		if(counter == 0) {
+			remove("output/ZoneServer");
+			fclose(fp_zs_in);
+			fp_zs_in = fopen("input/ZoneServer", "rb");
+			fp_zs_out = fopen("output/ZoneServer", "ab");
+			counter = convert(fp_zs_in, fp_zs_out, crus_pattern_z, sizeof(crus_pattern_z) / sizeof(int), replace_ip);
+			printf("Found %d occurrences in ZoneServer.\n", counter);
+			fclose(fp_zs_out);
+		}
 	}
 	fclose(fp_zs_in);
 	//ZoneServer101
@@ -97,6 +150,9 @@ int main(int argc, char* argv[]) {
 		fclose(fp_zs2_out);
 	}
 	fclose(fp_zs2_in);
+	//cleanup
+	remove("output/WorldServer_1");
+	remove("output/WorldServer_2");
 	printf("\nDone... Press any key to quit.");
 	fflush(stdin);
 	getchar();
