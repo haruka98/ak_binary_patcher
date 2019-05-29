@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <windows.h>
+#include <sys/stat.h>
 
 int convert(FILE* fp_in, FILE* fp_out, int search[], int size, int replace[]);
 
@@ -10,6 +12,14 @@ int main(int argc, char* argv[]) {
 	int crus_pattern_z[] = {0xC7, 0x44, 0x89, 0xF0, 0x25, 0xFF, 0xFF, 0xFF, 0x00, 0x3D};
 	int replace_ip[4];
 	int counter = 0;
+	//check for folders
+	struct stat buffer;
+	if(!(stat("input", &buffer) == 0)) {
+		system("mkdir input");
+	}
+	if(!(stat("output", &buffer) == 0)) {
+		system("mkdir output");
+	}
 	//remove old files
 	remove("output/GatewayServer");
 	remove("output/HTTPAServer");
